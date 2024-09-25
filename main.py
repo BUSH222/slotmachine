@@ -79,25 +79,28 @@ def login():
         password = request.form['password']
         cur.execute("SELECT id, name, password, balance FROM users WHERE name = %s", (username,))
         user_data = cur.fetchone()
-    if user_data:
-        if user_data[2] == password and len(password) < 32:
-            user = User(*user_data)
-            login_user(user)
-            return redirect(url_for('dashboard'))
+        if user_data:
+            if user_data[2] == password and len(password) < 32:
+                user = User(*user_data)
+                login_user(user)
+                return redirect(url_for('dashboard'))
+            else:
+                print("bruh")
         else:
-            print("bruh")
+            cur.execute("SELECT MAX(id) FROM users")
+            maxid = int(cur.fetchone()[0])
+            cur.execute("INSERT INTO users (id, name, password) VALUES (%s, %s, %s) RETURNING id",
+                        (maxid+1, username, password))
+            new_user_id = cur.fetchone()[0]
+            conn.commit()
+        
+            cur.execute("SELECT id, name, password, balance FROM users WHERE id = %s", (new_user_id,))
+            new_user_data = cur.fetchone()
+            new_user = User(*new_user_data)
+            login_user(new_user)
+            return redirect(url_for('dashboard'))
     else:
-        # Если пользователь не существует, регистрируем нового пользователя
-        cur.execute("INSERT INTO users (name, password, balance) VALUES (%s, %s, %s) RETURNING id",
-                    (username, password, 0))
-        new_user_id = cur.fetchone()[0]
-        conn.commit()
-        # Получаем данные нового пользователя
-        cur.execute("SELECT id, name, password, balance FROM users WHERE id = %s", (new_user_id,))
-        new_user_data = cur.fetchone()
-        new_user = User(*new_user_data)
-        login_user(new_user)
-        return redirect(url_for('dashboard'))
+        return render_template('login.html')
 
 
 @app.route('/dashboard')
