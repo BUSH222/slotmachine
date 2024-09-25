@@ -14,9 +14,10 @@
             <div class="reel" id="reel2">{{ emoji2 }}</div>
             <div class="reel" id="reel3">{{ emoji3 }}</div>
         </div>
-        <button id="spin-button">Spin</button>
+        <div class="balance" id="balance">{{ balance }}</div>
+        <button id=spin-button onClick="window.location.reload();">Spin</button>
+        
         <div class="result" id="result"></div>
     </div>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

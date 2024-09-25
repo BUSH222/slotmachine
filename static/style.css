@@ -58,6 +58,12 @@ h1 {
     background-color: #218838;
 }
 
+.balance {
+    font-size: 1.5 rem;
+    color:#333;
+    margin-bottom: 20px;
+}
+
 .result {
     margin-top: 30px;
     font-size: 1.5rem;
