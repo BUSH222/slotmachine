@@ -35,12 +35,7 @@ def update_balance(suser, updated):
     cur.execute('UPDATE users SET balance = %s WHERE id = %s', (suser.balance, suser.id))
 
 
-@app.route("/")
-def index():
-    return render_template('main.html')
-
-
-@app.route('/spin')
+@app.route('/')
 @login_required
 def spin():
     bet = 0
@@ -55,7 +50,8 @@ def spin():
     elif max_cnt == 3:
         bet = symbols[max_symbol]*3
     update_balance(current_user, bet-10)
-    return ' '.join(result) + '\n' + str(bet)
+    data = {'emoji1': result[0], 'emoji2': result[1], 'emoji3': result[2], 'balance': current_user.balance}
+    return render_template("main.html", data=data)
 
 
 class User(UserMixin):
@@ -82,11 +78,25 @@ def login():
         password = request.form['password']
         cur.execute("SELECT id, name, password, balance FROM users WHERE name = %s", (username,))
         user_data = cur.fetchone()
-        if user_data and user_data[2] == password and len(password) < 32:
+    if user_data:
+        if user_data[2] == password and len(password) < 32:
             user = User(*user_data)
             login_user(user)
             return redirect(url_for('dashboard'))
-    return render_template('login.html')
+        else:
+            print("bruh")
+    else:
+        # Если пользователь не существует, регистрируем нового пользователя
+        cur.execute("INSERT INTO users (name, password, balance) VALUES (%s, %s, %s) RETURNING id",
+                    (username, password, 0))
+        new_user_id = cur.fetchone()[0]
+        conn.commit()
+        # Получаем данные нового пользователя
+        cur.execute("SELECT id, name, password, balance FROM users WHERE id = %s", (new_user_id,))
+        new_user_data = cur.fetchone()
+        new_user = User(*new_user_data)
+        login_user(new_user)
+        return redirect(url_for('dashboard'))
 
 
 @app.route('/dashboard')
