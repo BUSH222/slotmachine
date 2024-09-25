@@ -38,10 +38,17 @@ def index():
 
 @app.route('/spin')
 def spin():
+    bet = int(request.args.get('bet'))
     symbols = {'🚅': 1, '🔐': 2, '🕌': 3, '🔥': 5, '🤗': 7, '🚆': 10, '🐞': 15, '🐘': 20, '💧': 50}
     result = sample(list(symbols.keys()), 3)
     max_symbol = max(set(result), key=result.count)
     max_cnt = list(symbols.keys()).count(max_symbol)
+    if max_cnt == 1:
+        bet = 0
+    elif max_cnt == 2:
+        bet = symbols[max_symbol]
+    elif max_cnt == 3:
+        bet = symbols[max_symbol]*3
     return max_symbol + str(max_cnt)
 
 
@@ -69,7 +76,7 @@ def login():
         balance = request.form['balance']
         cur.execute("SELECT id, username, password, balance FROM users WHERE username = %s", (username,))
         user_data = cur.fetchone()
-        if user_data and user_data[2] == password:
+        if user_data and user_data[2] == password and len(password) < 32:
             user = User(*user_data)
             login_user(user)
             return redirect(url_for('dashboard'))
