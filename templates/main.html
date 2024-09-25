@@ -1,1 +1,23 @@
-<h1>bruh</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <title>Slot Machine</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Slot Machine</h1>
+        <div class="slot-machine">
+            <div class="reel" id="reel1">{{ emoji1 }}</div>
+            <div class="reel" id="reel2">{{ emoji2 }}</div>
+            <div class="reel" id="reel3">{{ emoji3 }}</div>
+        </div>
+        <div class="balance" id="balance">{{ balance }}</div>
+        <button id=spin-button onClick="window.location.reload();">Spin</button>
+        
+        <div class="result" id="result"></div>
+    </div>
+</body>
+</html>
