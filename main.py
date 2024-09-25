@@ -37,6 +37,7 @@ def index():
 
 
 @app.route('/spin')
+@login_required
 def spin():
     bet = int(request.args.get('bet'))
     symbols = {'🚅': 1, '🔐': 2, '🕌': 3, '🔥': 5, '🤗': 7, '🚆': 10, '🐞': 15, '🐘': 20, '💧': 50}
@@ -49,7 +50,7 @@ def spin():
         bet = symbols[max_symbol]
     elif max_cnt == 3:
         bet = symbols[max_symbol]*3
-    return max_symbol + str(max_cnt)
+    return 
 
 
 
@@ -62,7 +63,7 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    cur.execute("SELECT id, username, password, balance FROM users WHERE id = %s", (user_id,))
+    cur.execute("SELECT id, name, password, balance FROM users WHERE id = %s", (user_id,))
     user_data = cur.fetchone()
     if user_data:
         return User(*user_data)
@@ -73,8 +74,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        balance = request.form['balance']
-        cur.execute("SELECT id, username, password, balance FROM users WHERE username = %s", (username,))
+        cur.execute("SELECT id, name, password, balance FROM users WHERE name = %s", (username,))
         user_data = cur.fetchone()
         if user_data and user_data[2] == password and len(password) < 32:
             user = User(*user_data)
