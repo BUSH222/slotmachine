@@ -32,7 +32,7 @@ def preload_db():
 
 def update_balance(suser, updated):
     suser.balance += updated
-    cur.execute('UPDATE users SET balance = ? WHERE id = ?', (suser.balance, suser.id))
+    cur.execute('UPDATE users SET balance = %s WHERE id = %s', (suser.balance, suser.id))
 
 
 @app.route("/")
