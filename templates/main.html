@@ -10,11 +10,11 @@
     <div class="container">
         <h1>Slot Machine</h1>
         <div class="slot-machine">
-            <div class="reel" id="reel1">{{ emoji1 }}</div>
-            <div class="reel" id="reel2">{{ emoji2 }}</div>
-            <div class="reel" id="reel3">{{ emoji3 }}</div>
+            <div class="reel" id="reel1">{{ data.emoji1 }}</div>
+            <div class="reel" id="reel2">{{ data.emoji2 }}</div>
+            <div class="reel" id="reel3">{{ data.emoji3 }}</div>
         </div>
-        <div class="balance" id="balance">{{ balance }}</div>
+        <div class="balance" id="balance">{{ data.balance }}</div>
         <button id=spin-button onClick="window.location.reload();">Spin</button>
         
         <div class="result" id="result"></div>
