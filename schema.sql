@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(32),
+    password VARCHAR(32),
+    balance INTEGER DEFAULT 3000);
