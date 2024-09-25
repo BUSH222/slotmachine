@@ -1,6 +1,6 @@
-from flask import Blueprint, Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for
 from flask_login import login_user, LoginManager, current_user, login_required, UserMixin
-from random import sample
+from random import choices
 import psycopg2
 
 
@@ -30,6 +30,10 @@ def preload_db():
     print('done')
 
 
+def update_balance(suser, updated):
+    suser.balance += updated
+    cur.execute('UPDATE users SET balance = ? WHERE id = ?', (suser.balance, suser.id))
+
 
 @app.route("/")
 def index():
@@ -39,19 +43,19 @@ def index():
 @app.route('/spin')
 @login_required
 def spin():
-    bet = int(request.args.get('bet'))
+    bet = 0
     symbols = {'🚅': 1, '🔐': 2, '🕌': 3, '🔥': 5, '🤗': 7, '🚆': 10, '🐞': 15, '🐘': 20, '💧': 50}
-    result = sample(list(symbols.keys()), 3)
+    result = choices(list(symbols.keys()), k=3)
     max_symbol = max(set(result), key=result.count)
-    max_cnt = list(symbols.keys()).count(max_symbol)
+    max_cnt = list(result).count(max_symbol)
     if max_cnt == 1:
         bet = 0
     elif max_cnt == 2:
         bet = symbols[max_symbol]
     elif max_cnt == 3:
         bet = symbols[max_symbol]*3
-    return 
-
+    update_balance(current_user, bet-10)
+    return ' '.join(result) + '\n' + str(bet)
 
 
 class User(UserMixin):
@@ -61,6 +65,7 @@ class User(UserMixin):
         self.password = password
         self.balance = balance
 
+
 @login_manager.user_loader
 def load_user(user_id):
     cur.execute("SELECT id, name, password, balance FROM users WHERE id = %s", (user_id,))
@@ -68,6 +73,7 @@ def load_user(user_id):
     if user_data:
         return User(*user_data)
     return None
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -82,12 +88,13 @@ def login():
             return redirect(url_for('dashboard'))
     return render_template('login.html')
 
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
     return f'Hello, {current_user.username}! Your balance is {current_user.balance}.'
 
-    
+
 if __name__ == '__main__':
     preload_db()
     app.run(host='0.0.0.0', port=8000, debug=True)
