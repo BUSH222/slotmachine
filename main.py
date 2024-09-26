@@ -93,7 +93,6 @@ def login():
                         (maxid+1, username, password))
             new_user_id = cur.fetchone()[0]
             conn.commit()
-        
             cur.execute("SELECT id, name, password, balance FROM users WHERE id = %s", (new_user_id,))
             new_user_data = cur.fetchone()
             new_user = User(*new_user_data)
