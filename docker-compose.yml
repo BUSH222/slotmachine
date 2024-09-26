@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:12345678@db:5432/slotmachine
+
+  db:
+    image: postgres:16.4
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123445678
+      POSTGRES_DB: slotmachine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
