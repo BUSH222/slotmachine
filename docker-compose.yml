@@ -1,23 +1,38 @@
-version: '3.8'
+version: '3.9'
 
 services:
   web:
-    build: .
-    ports:
-      - "5000:5000"
+    # build: 
+    #   dockerfile: Dockerfile
+    #   context: .
+    container_name: web
+    image: dockf
     depends_on:
-      - db
+      - postgres
     environment:
-      - DATABASE_URL=postgresql://postgres:12345678@db:5432/slotmachine
+      # POSTGRES_USER: postgres
+      # POSTGRES_PASSWORD: 12345678
+      # POSTGRES_DB: slotmachine
+      # POSTGRES_HOST: postgres
+      # POSTGRES_PORT: db
+      DATABASE_URL: postgres://postgres:12345678@postgres:5432/slotmachine
+    expose: 
+        - 8000
+    command: python main.py
 
-  db:
+  postgres:
+    container_name: postgres
     image: postgres:16.4
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123445678
       POSTGRES_DB: slotmachine
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: 12345678
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    # command: psql -U postgress && 12345678
+
 
 volumes:
   postgres_data:

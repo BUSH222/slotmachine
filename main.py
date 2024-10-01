@@ -1,6 +1,7 @@
 from flask import Flask, redirect, render_template, request, url_for
 from flask_login import login_user, LoginManager, current_user, login_required, UserMixin
 from random import choices
+import os
 import psycopg2
 
 
@@ -10,11 +11,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-conn = psycopg2.connect(database='slotmachine',
-                        user='postgres',
-                        host='localhost',
-                        password='12345678',
-                        port=5432)
+DATABASE_URL = os.getenv('DATABASE_URL')
+# conn = psycopg2.connect(database='slotmachine',
+#                         user='postgres',
+#                         host='postgres',
+#                         password='12345678',
+#                         port=5432)
+conn = psycopg2.connect(DATABASE_URL)
 cur = conn.cursor()
 
 schema_obj = open('schema.sql', 'r')
@@ -83,7 +86,7 @@ def login():
             if user_data[2] == password and len(password) < 32:
                 user = User(*user_data)
                 login_user(user)
-                return redirect(url_for('dashboard'))
+                return redirect('/')
             else:
                 print("bruh")
         else:
@@ -97,15 +100,15 @@ def login():
             new_user_data = cur.fetchone()
             new_user = User(*new_user_data)
             login_user(new_user)
-            return redirect(url_for('dashboard'))
+            return redirect('/')
     else:
         return render_template('login.html')
 
 
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    return f'Hello, {current_user.username}! Your balance is {current_user.balance}.'
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+#     return f'Hello, {current_user.username}! Your balance is {current_user.balance}.'
 
 
 if __name__ == '__main__':
