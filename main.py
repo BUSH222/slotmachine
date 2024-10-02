@@ -1,7 +1,9 @@
 from flask import Flask, redirect, render_template, request, url_for
 from flask_login import login_user, LoginManager, current_user, login_required, UserMixin
 from random import choices
-import os
+from os import environ
+from dotenv import load_dotenv
+
 import psycopg2
 
 
@@ -11,13 +13,27 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-DATABASE_URL = os.getenv('DATABASE_URL')
-# conn = psycopg2.connect(database='slotmachine',
-#                         user='postgres',
-#                         host='postgres',
-#                         password='12345678',
-#                         port=5432)
-conn = psycopg2.connect(DATABASE_URL)
+load_dotenv()
+
+# DATABASE_URL = "postgres://postgres:12345678@localhost:5432/slotmachine"
+# POSTGRES_USER = 'postgres'
+# POSTGRES_PASSWORD = '12345678'
+# POSTGRES_DB = 'slotmachine'
+# POSTGRES_HOST = 'localhost'
+# POSTGRES_PORT = 5432
+DATABASE_UR = environ.get('DATABASE_URL')
+POSTGRES_USE = environ.get('POSTGRES_USER')
+POSTGRES_PASSWOR = environ.get('POSTGRES_PASSWORD')
+POSTGRES_D = environ.get('POSTGRES_DB')
+POSTGRES_POR = environ.get('POSTGRES_PORT')
+POSTGRES_HOS = environ.get('POSTGRES_HOST')
+print(POSTGRES_PASSWOR)
+conn = psycopg2.connect(database=POSTGRES_D,
+                        user=POSTGRES_USE,
+                        host=POSTGRES_HOS,
+                        password=POSTGRES_PASSWOR
+                        )
+# conn = psycopg2.connect(DATABASE_URL)
 cur = conn.cursor()
 
 schema_obj = open('schema.sql', 'r')
