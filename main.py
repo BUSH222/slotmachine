@@ -1,10 +1,11 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request
 from flask_login import login_user, LoginManager, current_user, login_required, UserMixin
 from random import choices
 from os import environ
 from dotenv import load_dotenv
 
 import psycopg2
+from psycopg2 import sql
 
 
 app = Flask(__name__)
@@ -13,14 +14,35 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-load_dotenv()
+schema_obj = open('schema.sql', 'r')
+schema = schema_obj.read()
+print(schema)
+schema_obj.close()
 
-# DATABASE_URL = "postgres://postgres:12345678@localhost:5432/slotmachine"
-# POSTGRES_USER = 'postgres'
-# POSTGRES_PASSWORD = '12345678'
-# POSTGRES_DB = 'slotmachine'
-# POSTGRES_HOST = 'localhost'
-# POSTGRES_PORT = 5432
+
+def preload_db():
+    conn = psycopg2.connect(database='postgres',
+                            user='postgres',
+                            host='localhost',
+                            password='12345678',
+                            port='5432')
+    cursor = conn.cursor()
+    conn.autocommit = True
+    cursor.execute('SELECT 1 FROM pg_database WHERE datname = %s', ('slotmachine',))
+    exists = cursor.fetchone()
+
+    if not exists:
+        cursor.execute(sql.SQL(
+            'CREATE DATABASE {} WITH OWNER = %s ENCODING = %s LOCALE_PROVIDER = %s CONNECTION LIMIT = %s'
+        ).format(sql.Identifier('slotmachine')),
+            ('postgres', 'UTF8', 'libc', -1)
+        )
+    conn.commit()
+
+
+load_dotenv()
+preload_db()
+
 DATABASE_UR = environ.get('DATABASE_URL')
 POSTGRES_USE = environ.get('POSTGRES_USER')
 POSTGRES_PASSWOR = environ.get('POSTGRES_PASSWORD')
@@ -35,18 +57,7 @@ conn = psycopg2.connect(database=POSTGRES_D,
                         )
 # conn = psycopg2.connect(DATABASE_URL)
 cur = conn.cursor()
-
-schema_obj = open('schema.sql', 'r')
-schema = schema_obj.read()
-schema_obj.close()
-
-
-def preload_db():
-    cur.execute(schema)
-    conn.commit()
-    cur.execute('SELECT * FROM users')
-    print(cur.fetchall())
-    print('done')
+cur.execute(schema)
 
 
 def update_balance(suser, updated):
@@ -106,10 +117,8 @@ def login():
             else:
                 print("bruh")
         else:
-            cur.execute("SELECT MAX(id) FROM users")
-            maxid = int(cur.fetchone()[0])
-            cur.execute("INSERT INTO users (id, name, password) VALUES (%s, %s, %s) RETURNING id",
-                        (maxid+1, username, password))
+            cur.execute("INSERT INTO users (name, password) VALUES (%s, %s) RETURNING id",
+                        (username, password))
             new_user_id = cur.fetchone()[0]
             conn.commit()
             cur.execute("SELECT id, name, password, balance FROM users WHERE id = %s", (new_user_id,))
@@ -128,5 +137,4 @@ def login():
 
 
 if __name__ == '__main__':
-    preload_db()
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(port=5000)
