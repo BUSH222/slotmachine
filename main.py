@@ -130,10 +130,10 @@ def login():
         return render_template('login.html')
 
 
-# @app.route('/dashboard')
-# @login_required
-# def dashboard():
-#     return f'Hello, {current_user.username}! Your balance is {current_user.balance}.'
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return f'Hello, {current_user.username}! Your balance is {current_user.balance}.'
 
 
 if __name__ == '__main__':
